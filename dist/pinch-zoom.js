@@ -438,33 +438,24 @@ var PinchZoom = (function() {
             if (scale === this.scale && x === this.x && y === this.y) return;
 
             // Avoid image going out of bounds
-            const childBounds = this.children[0].getBoundingClientRect();
             const viewportWidth = this.offsetWidth;
             const xOffset = this.children[0].offsetWidth * scale.toFixed(2);
             const viewportHeight = this.offsetHeight;
             const yOffset = this.children[0].offsetHeight * scale.toFixed(2);
+            const childOffset = this.children[0].offsetWidth / 4;
 
-            if (childBounds.left >= 0 && horizontalDir === 'left') {
-                this._transform.e = 0;
-            } else if (childBounds.right <= viewportWidth && horizontalDir === 'right') {
-                this._transform.e = viewportWidth - xOffset;
-            } else {
-                this._transform.e = x;
+            this._transform.e = x;
+            this._transform.f = y;
+
+            if (this._transform.e < viewportWidth - xOffset + childOffset) {
+                this._transform.e = viewportWidth - xOffset + childOffset;
             }
-
-            if (childBounds.top >= 0 && verticalDir === 'down') {
-                this._transform.f = 0;
-            } else if (childBounds.bottom <= viewportHeight && verticalDir === 'up') {
+            if (this._transform.f < viewportHeight - yOffset) {
                 this._transform.f = viewportHeight - yOffset;
-            } else {
-                this._transform.f = y;
             }
-
-            if (this._transform.f < viewportHeight - yOffset) this._transform.f = viewportHeight - yOffset;
-            if (this._transform.e < viewportWidth - xOffset) this._transform.e = viewportWidth - xOffset;
 
             if (this._transform.f > 0) this._transform.f = 0;
-            if (this._transform.e > 0) this._transform.e = 0;
+            if (this._transform.e > childOffset) this._transform.e = childOffset;
 
             this._transform.d = this._transform.a = scale;
             this.style.setProperty('--x', this.x + 'px');
